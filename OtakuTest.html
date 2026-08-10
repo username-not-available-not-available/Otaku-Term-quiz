@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Otaku Are You?</title>
+    <style>
+        :root {
+            --bg-color: #121212;　
+            --container-bg: #1e1e24;
+            --accent-pink: #ff2a6d;
+            --accent-blue: #05d9e8; 
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--accent-pink);
+            text-shadow: 2px 2px 4px rgba(255, 42, 109, 0.3);
+            margin-bottom: 5px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: var(--accent-blue);
+            font-size: 1.1em;
+            margin-top: 0;
+        }
+
+        .instructions {
+            background-color: var(--container-bg);
+            padding: 15px 20px;
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 5px;
+            max-width: 800px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .term-card {
+            background-color: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .term-card:hover {
+            border-color: var(--accent-pink);
+            transform: translateY(-2px);
+        }
+
+        .term-card input[type="checkbox"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-pink);
+        }
+
+        .term-text {
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-blue));
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 50px;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.5);
+        }
+
+        /* Results Modal */
+        #results-container {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .results-box {
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 30px rgba(255, 42, 109, 0.2);
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid var(--accent-pink);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
+            color: white;
+        }
+
+        .tier-title {
+            color: var(--accent-blue);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .tier-desc {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 20px;
+        }
+
+        .profile-readout {
+            max-width: 500px;
+            margin: 0 auto 22px auto;
+            padding: 14px 16px;
+            background: rgba(5, 217, 232, 0.06);
+            border: 1px solid rgba(5, 217, 232, 0.22);
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .profile-label {
+            color: var(--text-muted);
+            font-size: 0.78em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 5px;
+        }
+
+        .profile-type {
+            color: var(--accent-pink);
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .profile-desc {
+            color: var(--text-main);
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .progress-profile {
+            color: var(--accent-blue);
+            font-size: 0.85em;
+            line-height: 1.4;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .tier-progress {
+            margin: 0 auto 30px auto;
+            max-width: 460px;
+            text-align: left;
+        }
+
+        .tier-progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        .tier-progress-track {
+            width: 100%;
+            height: 10px;
+            background-color: #2a2a32;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid #3a3a44;
+        }
+
+        .tier-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-blue));
+            border-radius: 999px;
+            transition: width 0.35s ease;
+        }
+
+        .tier-progress-range {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.8em;
+            margin-top: 6px;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: 2px solid var(--text-muted);
+            color: var(--text-main);
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--text-muted);
+            color: white;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .quiz-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>How Otaku Are You?</h1>
+        <p>95-terms to pick from to measure your vocabulary breadth and familarity</p>
+    </div>
+
+    <div class="instructions">
+        <strong>Rules:</strong> Be completely honest. Only check the box if you <em>actually</em> know what the term means in the context of anime, manga, and Japanese subcultures without having to look it up.
+    </div>
+
+    <div class="quiz-grid" id="quiz-grid">
+        <!-- Checkboxes will be injected here via JavaScript -->
+    </div>
+
+    <button class="submit-btn" onclick="calculateScore()">Calculate My Power Level</button>
+
+    <div id="results-container">
+        <div class="results-box">
+            <div class="score-circle" id="score-display">0%</div>
+            <h2 class="tier-title" id="tier-name">Tier Name</h2>
+            <p class="tier-desc" id="tier-desc">Tier Description</p>
+            <div class="profile-readout">
+                <div class="profile-label">Likely profile</div>
+                <div class="profile-type" id="profile-type">Profile</div>
+                <div class="profile-desc" id="profile-desc">Profile description</div>
+            </div>
+            <div class="tier-progress">
+                <div class="tier-progress-label">
+                    <span>Position within this tier</span>
+                    <span id="tier-progress-value">0%</span>
+                </div>
+                <div class="tier-progress-track">
+                    <div class="tier-progress-fill" id="tier-progress-fill"></div>
+                </div>
+                <div class="tier-progress-range">
+                    <span id="tier-progress-min">−</span>
+                    <span id="tier-progress-max">+</span>
+                </div>
+                <div class="progress-profile" id="progress-profile">
+                    Profile position within this tier
+                </div>
+            </div>
+            <button class="close-btn" onclick="closeResults()">Close & Review</button>
+        </div>
+    </div>
+
+    <script>
+        // The complete list of 95 terms provided
+        const termsList = [
+            "「アイドル」・aidoru・idol",
+            "「アクキ・アクリルキーホルダー」・akuki・akuriru kīhorudā・acrylic key holder",
+            "「アクスタ・アクリルスタンド」・akusuta・akuriru sutando・acrylic stand",
+            "「アニメ」・anime",
+            "「エロガキ」・erogaki",
+            "「エロゲー」・erogē",
+            "「エログロ」・ero guro",
+            "「押し」・oshi",
+            "「お嬢デレ」・ojōdere",
+            "「お宅・オタク・ヲタク」・otaku",
+            "「男の娘」・otokonoko",
+            "「ガキ」・gaki",
+            "「ガチャ・がちゃぽん」・gacha・gachapon",
+            "「ガチ恋」・gachikoi",
+            "「かみデレ」・kamidere",
+            "「キャラ」・kyara・character",
+            "「ギャル」・gyaru・gal",
+            "「ギャルゲ」・gyaruge・galge",
+            "「着ぐるみ」・kigurumi",
+            "「クーデレ」・kūdere",
+            "「クソガキ」・kusogaki",
+            "「けもの・獣」・kemono",
+            "「ケモ耳」・kemomimi",
+            "「元気っ子」・genkikko",
+            "「コスプレ」・kosupure・cosplay",
+            "「コミックマーケット・コミケ」・komikku māketto・komike・Comic Market・Comiket",
+            "「サキュバス」・sakyubasu・succubus",
+            "「ざこ・雑魚」・zako",
+            "「CV」・shī būi・character voice",
+            "「JS・JC・JK」・jē esu・jē shī・jē kē",
+            "「少女」・shōjo",
+            "「少年」・shōnen",
+            "「清掃」・seisō",
+            "「青年」・seinen",
+            "「制服」・seifuku",
+            "「ダンデレ」・dandere",
+            "「ちび」・chibi",
+            "「厨二病」・chūnibyō",
+            "「ツンデレ」・tsundere",
+            "「ツンドラ」・tsundora・tundra",
+            "「特撮」・tokusatsu",
+            "「同人・同人誌」・dōjin・dōjinshi",
+            "「ドS」・do esu",
+            "「ドM」・do emu",
+            "「ドッジコ」・dojikko",
+            "「泣きゲー」・nakigē",
+            "「ニコニコ動画」・Nikoniko Dōga",
+            "「二次創作」・niji sōsaku",
+            "「2.5 次元」・ni-ten-go jigen",
+            "「ぬいぐるみ」・nuigurumi",
+            "「池沼」・chishō", 
+            "「バカデレ」・bakadere",
+            "「バブみ」・babumi",
+            "「Pixiv」・pikushibu・Pixiv",
+            "「美少女」・bishōjo",
+            "「美少年」・bishōnen",
+            "「姫女子」・himejoshi",
+            "「姫デレ」・himedere",
+            "「腐女子」・fujoshi",
+            "「フラグ」・furagu・flag",
+            "「ボーイッシュ」・bōisshu・boyish",
+            "「ボーカロイド」・bōkaroido・Vocaloid",
+            "「僕女」・bokukko",
+            "「魔法少女・魔女っ子」・mahō shōjo・majokko",
+            "「漫画・コミック」・manga・komikku・comic",
+            "「メカ」・meka・mecha",
+            "「メスガキ」・mesugaki",
+            "「メンヘラ・メンヘラ系」・menhera・menherakei",
+            "「萌え」・moe",
+            "「萌え擬人化」・moe gijinka",
+            "「モンスター娘」・monsutā musume・monster girl",
+            "「ヤマンバ・マンバ」・yamanba・manba",
+            "「ヤンデレ」・yandere",
+            "「ゆるキャラ」・yuru kyara",
+            "「幼女」・yōjo",
+            "「嫁さん」・yomesan",
+            "「ラバスト・ラバーストラップ」・rabasuto・rabā sutorappu・rubber strap",
+            "「ラブコメ」・rabukome・romcom",
+            "「ライトノベル・ラノベ」・raito noberu・ranobe・light novel",
+            "「リア充」・riajū",
+            "「リセマラ・リセットマラソン」・risemara・risettomarason・reset marathon",　
+            "「ロリ」・rori・loli",
+            "「ロリコン」・rorikon・lolicon",
+            "「ロリター・ロリター系」・roritā・roritākei・Lolita",
+            "「うpつ」・upotsu",
+            "「鬱デレ」・utsudere",
+            "「鬱ゲー」・utsuge",
+            "「痛バ」・itaba",
+            "「痛しゃ・イタシャ」・itasha",
+            "「地雷・地雷系」・jirai・jiraikei",
+            "「神・神ゲ・神曲」・kami・kamige・kamikyoku",
+            "「垂れ目・つり目」・tareme・tsurime",
+            "「ビジュアルノベル」・bijuaru noberu・visual novel",
+            "「四コマ漫画」・yonkoma manga",
+            "「女性」・josei"
+        ];
+
+        // Generate the quiz grid
+        const grid = document.getElementById('quiz-grid');
+        termsList.forEach((term, index) => {
+            const label = document.createElement('label');
+            label.className = 'term-card';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'term-checkbox';
+            checkbox.id = 'term-' + index;
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'term-text';
+            textSpan.textContent = term;
+
+            label.appendChild(checkbox);
+            label.appendChild(textSpan);
+            grid.appendChild(label);
+        });
+
+        // Restrained profile readings.
+        // Each tier has its own overall profile plus five within-tier readings.
+        // The five readings follow the existing progress bar continuously:
+        // 0–19%, 20–39%, 40–59%, 60–79%, 80–100%.
+        const profileReadings = [
+            {
+                overall: "Mainstream / Casual",
+                description: "Your answers point mainly toward the widely circulated side of anime and manga culture. You are more likely to recognize major titles, common terminology, and concepts that appear outside dedicated fan spaces.",
+                stages: [
+                    ["Occasional Exposure", "Your familiarity looks mostly incidental: widely known terms, major franchises, or vocabulary picked up through general pop-culture exposure."],
+                    ["Mainstream Viewer", "You appear comfortable with the basic language around anime and manga, but your vocabulary still clusters around commonly encountered material."],
+                    ["Casual Fan", "Your answers suggest deliberate interest rather than simple exposure, with a modest base of recurring fandom vocabulary."],
+                    ["Developing Regular", "You are beginning to show the vocabulary pattern of someone who follows anime or manga with some consistency rather than only major releases."],
+                    ["Near General Familiarity", "Your profile is starting to resemble a regular fan: the remaining gap is mainly breadth across ordinary fandom terminology."]
+                ]
+            },
+            {
+                overall: "Regular Anime Fan",
+                description: "Your vocabulary looks like someone who follows anime beyond isolated mainstream hits and has absorbed recurring character, genre, and fandom language through regular exposure.",
+                stages: [
+                    ["Light Regular", "You have moved beyond purely mainstream vocabulary and show signs of recurring exposure to anime-specific language and character terminology."],
+                    ["Seasonal / Ongoing Viewer", "Your answers fit someone who follows enough anime or manga to encounter common fandom shorthand repeatedly."],
+                    ["Established Fan", "You have a stable working vocabulary for ordinary anime discussion, including common archetypes and community terms."],
+                    ["Fandom-Aware Regular", "Your familiarity now reaches beyond watching or reading into the language used around fan discussion and recurring subculture concepts."],
+                    ["Near Fandom-Oriented", "Your pattern is approaching someone who participates in or closely observes fan culture, not just the media itself."]
+                ]
+            },
+            {
+                overall: "Fandom-Oriented",
+                description: "Your answers suggest regular contact with fan culture itself, not just the media: character archetypes, community vocabulary, merchandise, conventions, and adjacent subcultures are familiar territory.",
+                stages: [
+                    ["Community-Aware Fan", "You recognize enough fan-specific language that discussion spaces, memes, archetypes, and fandom habits are probably familiar rather than foreign."],
+                    ["Active Fandom Participant", "Your vocabulary suggests repeated exposure to fan communities and the terminology that develops around characters, shipping, merchandise, and events."],
+                    ["Broad Hobbyist", "Anime and related culture appear to function as a substantial hobby, with knowledge spread across media and fandom practices."],
+                    ["Subculture-Curious", "You are reaching into terminology that tends to appear outside ordinary anime discussion, including narrower niches and fan-created culture."],
+                    ["Near Subculture-Oriented", "Your answers are beginning to look less like standard fandom knowledge and more like sustained exposure to specialized otaku vocabulary."]
+                ]
+            },
+            {
+                overall: "Subculture-Oriented",
+                description: "Your vocabulary extends well past ordinary anime discussion into merchandise, fan works, character niches, Japanese internet language, and terminology that usually comes from sustained exposure.",
+                stages: [
+                    ["Niche-Aware", "You are comfortable with terminology that many ordinary anime fans would only encounter occasionally, especially around fan works and specific character or hobby niches."],
+                    ["Specialized Hobbyist", "Your answers suggest active familiarity with several corners of otaku culture rather than one narrow stream of anime consumption."],
+                    ["Subculture Regular", "Japanese fandom and otaku-specific terminology appear to be routine parts of your media vocabulary rather than occasional discoveries."],
+                    ["Deep-Niche Familiarity", "You recognize language drawn from older, narrower, or more specialized spaces alongside current fandom vocabulary."],
+                    ["Near Extensive Familiarity", "Your profile is approaching broad subculture literacy, with relatively few gaps across the different kinds of terms represented here."]
+                ]
+            },
+            {
+                overall: "Deep Subculture / Internet",
+                description: "The pattern points toward long-running or wide-ranging exposure to otaku spaces, including older internet vocabulary, niche character terminology, fan works, games, and specialized merchandise language.",
+                stages: [
+                    ["Deep Fandom Regular", "You recognize most ordinary and niche vocabulary in the set, suggesting sustained involvement rather than short-term familiarity."],
+                    ["Internet-Subculture Fluent", "Your answers show strong overlap with terminology from Japanese internet culture, fan communities, games, and older online fandom."],
+                    ["Cross-Niche Otaku", "Your knowledge is distributed across several subcultures rather than concentrated only in anime titles or mainstream fandom."],
+                    ["Long-Exposure Profile", "The breadth of your vocabulary fits someone who has accumulated terminology across eras, platforms, genres, and hobby spaces."],
+                    ["Near Broad-Spectrum", "Only a small portion of the set separates this profile from near-complete coverage across the represented otaku vocabulary."]
+                ]
+            },
+            {
+                overall: "Broad-Spectrum Otaku",
+                description: "Your answers span mainstream anime, character terminology, fan works, games, merchandise, older internet culture, and niche vocabulary. The distinctive feature here is breadth rather than any single specialty.",
+                stages: [
+                    ["Very Broad Coverage", "You recognize almost the entire vocabulary set, with knowledge extending across both mainstream and specialized areas."],
+                    ["Cross-Subculture Coverage", "Your profile shows very few obvious category gaps across media, fandom, merchandise, games, and internet terminology."],
+                    ["Near-Complete Vocabulary", "At this point the result mainly reflects breadth of retained terminology rather than a shift into a different kind of fan identity."],
+                    ["Exceptional Breadth", "Your answers cover nearly every type of term represented in the test, including material that is uncommon outside dedicated subculture spaces."],
+                    ["Full-Range Result", "You recognized essentially the complete set. This indicates unusually broad vocabulary coverage within the specific terms tested, without implying expertise beyond that scope."]
+                ]
+            }
+        ];
+
+        function calculateScore() {
+            const checkboxes = document.querySelectorAll('.term-checkbox');
+            const total = checkboxes.length;
+            let score = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) score++;
+            });
+
+            const percentage = Math.round((score / total) * 100);
+            
+            let tierName = "";
+            let tierDesc = "";
+            let tierIndex = 0;
+
+            /* 
+             * THE MATH & TIERS:
+             * Based on standard deviations of knowledge retention in subcultures.
+             * 0-15%: Basic Familiarity
+             * 16-35%: General Familiarity
+             * 36-60%: Regular Familiarity
+             * 61-80%: Broad Familiarity
+             * 81-95%: Extensive Familiarity
+             * 96-100%: Very High Familiarity
+             */
+
+            let tierMin = 0;
+            let tierMax = 15;
+
+            if (percentage <= 15) {
+                tierName = "Tier 1: Basic Familiarity";
+                tierDesc = "You recognize a smaller set of common anime, manga, and fandom terms. Your familiarity is mainly with widely used vocabulary.";
+                tierMin = 0;
+                tierMax = 15;
+                tierIndex = 0;
+            } else if (percentage <= 35) {
+                tierName = "Tier 2: General Familiarity";
+                tierDesc = "You recognize a range of common terms, character archetypes, and everyday fandom vocabulary, with some gaps in less common terminology.";
+                tierMin = 16;
+                tierMax = 35;
+                tierIndex = 1;
+            } else if (percentage <= 60) {
+                tierName = "Tier 3: Regular Familiarity";
+                tierDesc = "You are familiar with many standard terms across anime, manga, character types, merchandise, and fan culture, including some less common vocabulary.";
+                tierMin = 36;
+                tierMax = 60;
+                tierIndex = 2;
+            } else if (percentage <= 80) {
+                tierName = "Tier 4: Broad Familiarity";
+                tierDesc = "You recognize a broad range of terms, including more specific character, merchandise, genre, and internet-culture vocabulary.";
+                tierMin = 61;
+                tierMax = 80;
+                tierIndex = 3;
+            } else if (percentage <= 95) {
+                tierName = "Tier 5: Extensive Familiarity";
+                tierDesc = "You recognize most of the terms in this set, including many niche or older expressions that are less common in general anime and manga discussion.";
+                tierMin = 81;
+                tierMax = 95;
+                tierIndex = 4;
+            } else {
+                tierName = "Tier 6: Very High Familiarity";
+                tierDesc = "You recognize nearly all or all of the terms in this set, including specialized, niche, and less frequently used vocabulary.";
+                tierMin = 96;
+                tierMax = 100;
+                tierIndex = 5;
+            }
+
+            const tierProgress = tierMax === tierMin
+                ? 100
+                : Math.round(((percentage - tierMin) / (tierMax - tierMin)) * 100);
+            const clampedTierProgress = Math.max(0, Math.min(100, tierProgress));
+
+            const profile = profileReadings[tierIndex];
+            const profileStageIndex = Math.min(4, Math.floor(clampedTierProgress / 20));
+            const profileStage = profile.stages[profileStageIndex];
+
+            // Update UI
+            document.getElementById('score-display').textContent = percentage + '%';
+            document.getElementById('tier-name').textContent = tierName;
+            document.getElementById('tier-desc').textContent = `Score: ${score} / ${total}. ` + tierDesc;
+            document.getElementById('profile-type').textContent = profile.overall;
+            document.getElementById('profile-desc').textContent = profile.description;
+            document.getElementById('tier-progress-fill').style.width = clampedTierProgress + '%';
+            document.getElementById('tier-progress-value').textContent = clampedTierProgress + '%';
+            document.getElementById('tier-progress-min').textContent = `− ${tierMin}%`;
+            document.getElementById('tier-progress-max').textContent = `+ ${tierMax}%`;
+            document.getElementById('progress-profile').innerHTML =
+                `<strong>${profileStage[0]}</strong> — ${profileStage[1]}`;
+            
+            // Show modal
+            document.getElementById('results-container').style.display = 'flex';
+        }
+
+        function closeResults() {
+            document.getElementById('results-container').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
